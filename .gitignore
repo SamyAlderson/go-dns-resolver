@@ -1,15 +1,27 @@
-__pycache__/
-*.pyc
-.pytest_cache/
-.env
-*.egg-info/
-dist/
-build/
-.venv/
-node_modules/
-target/
-bin/
-obj/
-*.o
-*.so
-*.dylib/
+# Ignore Go module cache
+/.go/
+
+# Ignore build artifacts
+/bin/
+/build/
+/dist/
+/_output/
+
+# Ignore IDE-specific files
+/.idea/
+/.vscode/
+*.vs/
+
+# Ignore system-specific files
+/venv/
+/__pycache__/
+
+# Ignore generated files
+/*.go.golang.org/
+/*.go2/
+/*.mod/
+/*.mod.csv/
+/*.sum/
+
+# Ignore IDE-specific settings
+/*.swp
