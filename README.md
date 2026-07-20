@@ -1,65 +1,27 @@
 # go-dns-resolver
-Simple DNS resolver written in Go
 
-## What and Why
-This project provides a simple DNS resolver implementation in Go, allowing you to perform lookups by domain name, IP address, and reverse DNS lookup.
+I built this because I got tired of using the built-in `net.LookupIP()` and `net.LookupAddr()` functions in Go, only to realize they return incomplete results or time out on me. 
+
+## What I wanted
+
+A simple DNS resolver that can look up domain names, IP addresses, and do reverse DNS lookups without the hassle of dealing with the official Go libraries.
 
 ## Features
 
-- **Lookup by domain name**: Resolve a domain name to its corresponding IP addresses.
-- **Lookup by IP address**: Resolve an IP address to its corresponding domain name.
-- **Reverse DNS lookup**: Perform a reverse DNS lookup on a given IP address.
+- `LookupDomain`: does a forward DNS lookup for a given domain name
+- `LookupIP`: does a reverse DNS lookup for a given IP address
+- `LookupAddr`: does a forward DNS lookup for a given IP address
 
-## Installation
-To use this resolver, run the following command:
-```bash
-go get github.com/miekg/dns
-go build
-```
-This will download the required `github.com/miekg/dns` package and compile the resolver.
+I know what you're thinking: "Why not just use `net.LookupIP()` and `net.LookupAddr()`?" Well, those functions are great, but they don't always return the full set of results. Sometimes they'll return only the A records, and you might miss the MX or NS records. Sometimes they'll time out, and you'll be stuck waiting for the timeout to expire. Not cool.
 
-## Usage
-To use the resolver, simply run the compiled executable and pass the desired lookup type and input as command-line arguments:
-```bash
-./go-dns-resolver lookup <domain_name> (or) <ip_address> (or) <ip_address> for reverse DNS lookup
-```
-For example:
-```bash
-./go-dns-resolver lookup example.com
-./go-dns-resolver lookup 8.8.8.8
-./go-dns-resolver reverse 8.8.8.8
-```
-## Build from Source
-To build the resolver from source, run the following command:
-```bash
-make
-```
-This will compile the resolver and create an executable file named `go-dns-resolver`.
+## Why not just use the `github.com/miekg/dns` package?
 
-## Project Structure
-The project structure is as follows:
-```bash
-go-dns-resolver/
-Makefile
-go.mod
-dns.go
-dns_test.go
-.gitignore
-```
-## Dependencies
-This project depends on the `github.com/miekg/dns` package for DNS resolution.
+Because it's a bit much for what I needed. Don't get me wrong, Miek Gieben's `dns` package is awesome, but it's got a lot of features I don't need. I just wanted a simple DNS resolver that can do forward and reverse lookups. This project does that.
 
-## License
-This project is licensed under the MIT License.
+## The Problem with DNS
+
+People often complain about DNS being broken or slow, but the real problem is that the APIs for DNS are just as messy as the underlying protocol. You gotta deal with timeouts and incomplete results and all sorts of other nonsense. This project tries to abstract that away a bit.
 
 ## Contributing
-Contributions are welcome! If you'd like to contribute, please submit a pull request or open an issue.
 
-## Architecture
-See [ARCHITECTURE.md](ARCHITECTURE.md) for a high-level overview of the project architecture.
-
-## Tests
-Unit tests for the resolver are located in `dns_test.go`. To run the tests, use the following command:
-```bash
-go test
-```
+If you've got a better way to do DNS lookups in Go, open a PR. I'd love to see it.
