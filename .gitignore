@@ -1,32 +1,26 @@
 # .gitignore
-# ignore node_modules and vendor directories
-node_modules/
+# ignore go files
+*.go
+
+# ignore vendor directory
 vendor/
 
-# ignore IDE files
-.idea/
-.vscode/
+# ignore node_modules directory
+node_modules/
 
-# ignore logs and cache files
-logs/
-cache/
+# ignore pycache directory
+__pycache__/
 
-# ignore compiled files
-*.class
-*.o
-*.exe
+# ignore egg files
+*.egg
 
-# ignore IDE temporary files
-*.tmp
-*.swp
+# ignore log files
+*.log
 
-# ignore git submodules
-.gitmodules
+# ignore coverage files
+coverage.xml
+coverage.html
 
-# ignore IDE backup files
-*.bak
-
-# ignore IDE project files
-*.iml
-*.ipr
-*.iws
+# ignore cache files
+.cache
+.cache/*
