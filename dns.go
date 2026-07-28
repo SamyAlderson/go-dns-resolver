@@ -1,4 +1,3 @@
-// Package dns provides a simple DNS resolver implementation.
 package dns
 
 import (
@@ -15,30 +14,6 @@ type Resolver struct {
 	dns.Client
 }
 
-// LookupByName performs a DNS lookup by domain name.
-func (r *Resolver) LookupByName(ctx context.Context, name string) (*dns.Msg, error) {
-	m := new(dns.Msg)
-	m.SetQuestion(dns.Fqdn(name), dns.TypeA)
-	r.Client.Exchange(m, dns.Fqdn(name))
-	return m, nil
-}
-
-// LookupByIP performs a DNS lookup by IP address.
-func (r *Resolver) LookupByIP(ctx context.Context, ip net.IP) (*dns.Msg, error) {
-	m := new(dns.Msg)
-	m.SetQuestion(dns.Fqdn(ip.String()), dns.TypePTR)
-	r.Client.Exchange(m, dns.Fqdn(ip.String()))
-	return m, nil
-}
-
-// ReverseLookup performs a reverse DNS lookup.
-func (r *Resolver) ReverseLookup(ctx context.Context, ip net.IP) (*dns.Msg, error) {
-	m := new(dns.Msg)
-	m.SetQuestion(net.IP(ip).String(), dns.TypePTR)
-	r.Client.Exchange(m, net.IP(ip).String())
-	return m, nil
-}
-
 // NewResolver returns a new DNS resolver instance.
 func NewResolver() *Resolver {
 	r := &Resolver{}
@@ -46,26 +21,53 @@ func NewResolver() *Resolver {
 	return r
 }
 
+// LookupByName performs a DNS lookup by domain name.
+func (r *Resolver) LookupByName(ctx context.Context, name string) (*dns.Msg, error) {
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(name), dns.TypeA)
+	return r.Client.Exchange(m, dns.Fqdn(name))
+}
+
+// LookupByIP performs a DNS lookup by IP address.
+func (r *Resolver) LookupByIP(ctx context.Context, ip net.IP) (*dns.Msg, error) {
+	if !ip.IsGlobalUnicast() {
+		return nil, fmt.Errorf("invalid IP address: %s", ip)
+	}
+	m := new(dns.Msg)
+	m.SetQuestion(dns.Fqdn(ip.String()), dns.TypePTR)
+	return r.Client.Exchange(m, dns.Fqdn(ip.String()))
+}
+
+// ReverseLookup performs a reverse DNS lookup.
+func (r *Resolver) ReverseLookup(ctx context.Context, ip net.IP) (*dns.Msg, error) {
+	if !ip.IsGlobalUnicast() {
+		return nil, fmt.Errorf("invalid IP address: %s", ip)
+	}
+	m := new(dns.Msg)
+	m.SetQuestion(net.IP(ip).String(), dns.TypePTR)
+	return r.Client.Exchange(m, net.IP(ip).String())
+}
+
 func main() {
 	r := NewResolver()
 	name := "example.com"
 	ip := net.ParseIP("8.8.8.8")
 
-	m, err := r.LookupByName(context.Background(), name)
-	if err != nil {
+	if m, err := r.LookupByName(context.Background(), name); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Printf("DNS record for %s: %s\n", name, m.Answer[0].(*dns.A).IP)
 	}
-	fmt.Printf("DNS record for %s: %s\n", name, m.Answer[0].(*dns.A).IP)
 
-	m, err = r.LookupByIP(context.Background(), ip)
-	if err != nil {
+	if m, err := r.LookupByIP(context.Background(), ip); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Printf("Reverse DNS record for %s: %s\n", ip, m.Answer[0].(*dns.PTR).Ptr)
 	}
-	fmt.Printf("Reverse DNS record for %s: %s\n", ip, m.Answer[0].(*dns.PTR).Ptr)
 
-	m, err = r.ReverseLookup(context.Background(), ip)
-	if err != nil {
+	if m, err := r.ReverseLookup(context.Background(), ip); err != nil {
 		log.Fatal(err)
+	} else {
+		fmt.Printf("Reverse DNS record for %s: %s\n", ip, m.Answer[0].(*dns.PTR).Ptr)
 	}
-	fmt.Printf("Reverse DNS record for %s: %s\n", ip, m.Answer[0].(*dns.PTR).Ptr)
 }
