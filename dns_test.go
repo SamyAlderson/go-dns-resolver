@@ -15,6 +15,9 @@ func TestLookupDomain(t *testing.T) {
 	if len(res.Answer) == 0 {
 		t.Errorf("no answer for domain lookup")
 	}
+	if res.Answer[0].Header().Rcode != dns.RcodeSuccess {
+		t.Errorf("unexpected rcode: %v", res.Answer[0].Header().Rcode)
+	}
 }
 
 func TestLookupIP(t *testing.T) {
@@ -26,6 +29,9 @@ func TestLookupIP(t *testing.T) {
 	}
 	if len(res.Answer) == 0 {
 		t.Errorf("no answer for IP lookup")
+	}
+	if res.Answer[0].Header().Rcode != dns.RcodeSuccess {
+		t.Errorf("unexpected rcode: %v", res.Answer[0].Header().Rcode)
 	}
 }
 
@@ -39,6 +45,9 @@ func TestReverseLookup(t *testing.T) {
 	if len(res.Answer) == 0 {
 		t.Errorf("no answer for reverse lookup")
 	}
+	if res.Answer[0].Header().Rcode != dns.RcodeSuccess {
+		t.Errorf("unexpected rcode: %v", res.Answer[0].Header().Rcode)
+	}
 }
 
 func TestInvalidInput(t *testing.T) {
@@ -47,5 +56,20 @@ func TestInvalidInput(t *testing.T) {
 	_, err := dns.DefaultMsg.Exchange(dns.DefaultMsg, "8.8.8.8:53")
 	if err == nil {
 		t.Errorf("expecting error for invalid input")
+	}
+	if err.Error() != "question section empty" {
+		t.Errorf("unexpected error message: %v", err.Error())
+	}
+}
+
+func TestExchangeError(t *testing.T) {
+	dns.DefaultMsg = &dns.Msg{}
+	dns.DefaultMsg.SetQuestion("example.com.", dns.TypeA)
+	_, err := dns.DefaultMsg.Exchange(dns.DefaultMsg, "invalid:53")
+	if err == nil {
+		t.Errorf("expecting error for invalid server address")
+	}
+	if err.Error() != "dial invalid:53: lookup invalid:53: no address associated with hostname" {
+		t.Errorf("unexpected error message: %v", err.Error())
 	}
 }
